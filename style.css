@@ -268,4 +268,31 @@ h1 {
     justify-content: flex-end;
     gap: 10px;
     margin-top: 20px;
+}/* Header */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.branding {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.site-logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border-radius: 50%;
+    /* Optional: circular if it is a token icon */
+}
+
+h1 {
+    font-size: 24px;
+    font-weight: 600;
 }
