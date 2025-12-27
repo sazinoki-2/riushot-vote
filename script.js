@@ -172,15 +172,15 @@ function renderProposals() {
         const votesAbstain = p.votes.abstain || 0;
         const creator = p.creator ? (p.creator.substring(0, 6) + "..." + p.creator.substring(p.creator.length - 4)) : "Unknown";
 
-        let deadlineText = "----/--/--";
+        let deadlineText = "----/--/-- --:--";
         if (p.deadline) {
             const d = new Date(p.deadline);
-            deadlineText = `${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}`;
+            deadlineText = `${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
         } else if (p.createdAt) {
-            // Fallback for old items: +3 days from creation
+            // Fallback for old items: +120 hours (5 days) from creation
             const d = new Date(p.createdAt);
-            d.setDate(d.getDate() + 3);
-            deadlineText = `${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}`;
+            d.setHours(d.getHours() + 120);
+            deadlineText = `${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
         }
 
         const total = votesFor + votesAgainst + votesAbstain;
