@@ -201,15 +201,21 @@ function renderProposals() {
         const creator = p.creator ? (p.creator.substring(0, 6) + "..." + p.creator.substring(p.creator.length - 4)) : "Unknown";
 
         let deadlineText = "----/--/-- --:--";
+        let deadlineDate = null;
+
         if (p.deadline) {
-            const d = new Date(p.deadline);
-            deadlineText = `${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+            deadlineDate = new Date(p.deadline);
+            deadlineText = `${deadlineDate.getFullYear()}/${(deadlineDate.getMonth() + 1).toString().padStart(2, '0')}/${deadlineDate.getDate().toString().padStart(2, '0')} ${deadlineDate.getHours().toString().padStart(2, '0')}:${deadlineDate.getMinutes().toString().padStart(2, '0')}`;
         } else if (p.createdAt) {
             // Fallback for old items: +120 hours (5 days) from creation
-            const d = new Date(p.createdAt);
-            d.setHours(d.getHours() + 120);
-            deadlineText = `${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+            deadlineDate = new Date(p.createdAt);
+            deadlineDate.setHours(deadlineDate.getHours() + 120);
+            deadlineText = `${deadlineDate.getFullYear()}/${(deadlineDate.getMonth() + 1).toString().padStart(2, '0')}/${deadlineDate.getDate().toString().padStart(2, '0')} ${deadlineDate.getHours().toString().padStart(2, '0')}:${deadlineDate.getMinutes().toString().padStart(2, '0')}`;
         }
+
+        // Check if voting period has ended
+        const now = new Date();
+        const isExpired = deadlineDate && now > deadlineDate;
 
         const total = votesFor + votesAgainst + votesAbstain;
         const forPercent = total === 0 ? 0 : Math.round((votesFor / total) * 100);
@@ -221,7 +227,7 @@ function renderProposals() {
         return `
             <div class="proposal-card">
                 <div class="proposal-header">
-                    <span class="proposal-status active">Active</span>
+                    <span class="proposal-status ${isExpired ? 'closed' : 'active'}">${isExpired ? '終了' : 'Active'}</span>
                     <span style="color:var(--text-secondary); font-size:12px">投票期限 ${deadlineText}</span>
                 </div>
                 <h3 class="proposal-title">${p.title}</h3>
@@ -262,7 +268,11 @@ function renderProposals() {
                 </div>
 
                 <!-- Actions -->
-                ${!hasVoted ? `
+                ${isExpired ? `
+                    <div style="margin-top:15px; font-size:14px; color:var(--text-secondary); text-align:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:4px;">
+                        投票期間が終了しました
+                    </div>
+                ` : (!hasVoted ? `
                     <div class="vote-options">
                         <button class="vote-btn" onclick="vote('${p.id}', 'for')">賛成</button>
                         <button class="vote-btn" onclick="vote('${p.id}', 'against')">反対</button>
@@ -272,7 +282,7 @@ function renderProposals() {
                     <div style="margin-top:15px; font-size:14px; color:var(--text-secondary); text-align:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:4px;">
                         投票済み
                     </div>
-                `}
+                `)}
             </div>
         `;
     }).join('');
