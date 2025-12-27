@@ -29,8 +29,8 @@
 
         <!-- Controls -->
         <div class="controls-bar">
-            <h2 style="font-size:18px; font-weight:500">Active Proposals</h2>
-            <button id="create-btn" class="btn" onclick="openModal()" disabled>+ Create Proposal</button>
+            <h2 style="font-size:18px; font-weight:500">投票一覧</h2>
+            <button id="create-btn" class="btn btn-primary" onclick="openModal()" disabled>+ 提案を作成</button>
         </div>
 
         <!-- Proposals List -->
@@ -43,21 +43,21 @@
     <!-- Create Modal -->
     <div id="create-modal" class="modal-overlay">
         <div class="modal">
-            <h3 class="modal-title">Create New Proposal</h3>
+            <h3 class="modal-title">提案を作成</h3>
 
             <div class="form-group">
-                <label>Title</label>
-                <input type="text" id="p-title" class="form-input" placeholder="e.g. Increase Staking Rewards">
+                <label>タイトル</label>
+                <input type="text" id="p-title" class="form-input" placeholder="例：報酬プールの増額案について">
             </div>
 
             <div class="form-group">
-                <label>Description</label>
-                <textarea id="p-desc" class="form-textarea" placeholder="Describe your proposal..."></textarea>
+                <label>提案内容</label>
+                <textarea id="p-desc" class="form-textarea" placeholder="提案の理由や詳細をここに書いてください。"></textarea>
             </div>
 
             <div class="modal-actions">
-                <button class="btn" onclick="closeModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="handleSubmitProposal()">Publish</button>
+                <button class="btn" onclick="closeModal()">キャンセル</button>
+                <button class="btn btn-primary" onclick="handleSubmitProposal()">公開</button>
             </div>
         </div>
     </div>
