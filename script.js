@@ -76,7 +76,7 @@ function createProposal(title, description) {
 // Wallet Logic
 async function connectWallet() {
     if (typeof window.ethereum === 'undefined') {
-        alert("MetaMask is not installed. Please install it to use this feature.");
+        alert("MetaMaskがインストールされていません。この機能を使用するにはインストールしてください。");
         return;
     }
 
@@ -141,7 +141,7 @@ function updateWalletUI() {
 // Voting Logic
 function vote(id, option) {
     if (!userAddress) {
-        alert("Please connect your wallet to vote.");
+        alert("投票するにはウォレットを接続してください。");
         return;
     }
 
@@ -149,7 +149,7 @@ function vote(id, option) {
     if (!proposal) return;
 
     if (proposal.votedUsers && proposal.votedUsers.includes(userAddress)) {
-        alert("You have already voted on this proposal.");
+        alert("既にこの提案に投票済みです。");
         return;
     }
 
