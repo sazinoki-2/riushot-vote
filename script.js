@@ -74,7 +74,12 @@ async function connectWallet() {
 
     } catch (error) {
         console.error(error);
-        alert("Connection failed: " + error.message);
+        // data checks for common user rejection codes (4001 is standard EIP-1193 user rejected request)
+        if (error.code === 4001 || error.code === 'ACTION_REJECTED') {
+            alert("接続がキャンセルされました。");
+        } else {
+            alert("接続に失敗しました: " + (error.message || "不明なエラー"));
+        }
         document.getElementById('connect-btn').innerText = "Connect Wallet";
     }
 }
@@ -214,7 +219,7 @@ function openModal() {
     // Check balance
     const currentBalance = parseFloat(userBalance);
     if (isNaN(currentBalance) || currentBalance < 2500) {
-        alert("You need at least 2500 RDGT to create a proposal.");
+        alert("提案を作成するには、最低2500 RDGTが必要です。");
         return;
     }
 
