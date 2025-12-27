@@ -156,8 +156,16 @@ function vote(id, option) {
     // Initialize abstain if not present (migration for old data)
     if (!proposal.votes.abstain) proposal.votes.abstain = 0;
 
-    // Update vote count
-    proposal.votes[option]++;
+    // Get user's token balance for weighted voting
+    const voteWeight = parseFloat(userBalance) || 0;
+
+    if (voteWeight <= 0) {
+        alert("投票するにはRDGTトークンが必要です。");
+        return;
+    }
+
+    // Update vote count with weighted balance
+    proposal.votes[option] = (proposal.votes[option] || 0) + voteWeight;
 
     // Track user
     if (!proposal.votedUsers) proposal.votedUsers = [];
@@ -226,7 +234,7 @@ function renderProposals() {
                 <div class="result-row">
                     <div class="result-meta">
                         <span>賛成</span>
-                        <span>${votesFor} (${forPercent}%)</span>
+                        <span>${votesFor.toLocaleString()} RDGT (${forPercent}%)</span>
                     </div>
                     <div class="progress-bar">
                         <div class="progress-fill" style="width: ${forPercent}%; background-color: var(--accent-color)"></div>
@@ -236,7 +244,7 @@ function renderProposals() {
                 <div class="result-row">
                     <div class="result-meta">
                         <span>反対</span>
-                        <span>${votesAgainst} (${againstPercent}%)</span>
+                        <span>${votesAgainst.toLocaleString()} RDGT (${againstPercent}%)</span>
                     </div>
                     <div class="progress-bar">
                         <div class="progress-fill" style="width: ${againstPercent}%; background-color: var(--danger-color)"></div>
@@ -246,7 +254,7 @@ function renderProposals() {
                 <div class="result-row">
                     <div class="result-meta">
                         <span>棄権</span>
-                        <span>${votesAbstain} (${abstainPercent}%)</span>
+                        <span>${votesAbstain.toLocaleString()} RDGT (${abstainPercent}%)</span>
                     </div>
                     <div class="progress-bar">
                         <div class="progress-fill" style="width: ${abstainPercent}%; background-color: #888"></div>
