@@ -39,12 +39,17 @@ function saveProposals() {
 }
 
 function createProposal(title, description) {
+    const deadlineDate = new Date();
+    deadlineDate.setDate(deadlineDate.getDate() + 3); // Default 3 days deadline
+
     const newProposal = {
         id: Date.now().toString(),
         title,
         description,
+        creator: userAddress,
         createdAt: new Date().toISOString(),
-        votes: { for: 0, against: 0 },
+        deadline: deadlineDate.toISOString(),
+        votes: { for: 0, against: 0, abstain: 0 },
         votedUsers: [] // Track who voted to prevent double voting locally
     };
     proposals.unshift(newProposal); // Add to top
@@ -132,6 +137,9 @@ function vote(id, option) {
         return;
     }
 
+    // Initialize abstain if not present (migration for old data)
+    if (!proposal.votes.abstain) proposal.votes.abstain = 0;
+
     // Update vote
     proposal.votes[option]++;
 
@@ -157,9 +165,27 @@ function renderProposals() {
     }
 
     container.innerHTML = proposals.map(p => {
-        const total = p.votes.for + p.votes.against;
-        const forPercent = total === 0 ? 0 : Math.round((p.votes.for / total) * 100);
-        const againstPercent = total === 0 ? 0 : Math.round((p.votes.against / total) * 100);
+        // Migration for missing fields
+        const votesFor = p.votes.for || 0;
+        const votesAgainst = p.votes.against || 0;
+        const votesAbstain = p.votes.abstain || 0;
+        const creator = p.creator ? (p.creator.substring(0, 6) + "..." + p.creator.substring(p.creator.length - 4)) : "Unknown";
+
+        let deadlineText = "----/--/--";
+        if (p.deadline) {
+            const d = new Date(p.deadline);
+            deadlineText = `${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}`;
+        } else if (p.createdAt) {
+            // Fallback for old items: +3 days from creation
+            const d = new Date(p.createdAt);
+            d.setDate(d.getDate() + 3);
+            deadlineText = `${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}`;
+        }
+
+        const total = votesFor + votesAgainst + votesAbstain;
+        const forPercent = total === 0 ? 0 : Math.round((votesFor / total) * 100);
+        const againstPercent = total === 0 ? 0 : Math.round((votesAgainst / total) * 100);
+        const abstainPercent = total === 0 ? 0 : Math.round((votesAbstain / total) * 100);
 
         const hasVoted = p.votedUsers && userAddress && p.votedUsers.includes(userAddress);
 
@@ -167,16 +193,19 @@ function renderProposals() {
             <div class="proposal-card">
                 <div class="proposal-header">
                     <span class="proposal-status active">Active</span>
-                    <span style="color:var(--text-secondary); font-size:12px">#${p.id}</span>
+                    <span style="color:var(--text-secondary); font-size:12px">投票期限 ${deadlineText}</span>
                 </div>
                 <h3 class="proposal-title">${p.title}</h3>
+                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">
+                    提案者: ${creator}
+                </div>
                 <p class="proposal-desc">${p.description}</p>
                 
                 <!-- Results -->
                 <div class="result-row">
                     <div class="result-meta">
-                        <span>For</span>
-                        <span>${p.votes.for} (${forPercent}%)</span>
+                        <span>賛成</span>
+                        <span>${votesFor} (${forPercent}%)</span>
                     </div>
                     <div class="progress-bar">
                         <div class="progress-fill" style="width: ${forPercent}%; background-color: var(--accent-color)"></div>
@@ -185,23 +214,34 @@ function renderProposals() {
                 
                 <div class="result-row">
                     <div class="result-meta">
-                        <span>Against</span>
-                        <span>${p.votes.against} (${againstPercent}%)</span>
+                        <span>反対</span>
+                        <span>${votesAgainst} (${againstPercent}%)</span>
                     </div>
                     <div class="progress-bar">
                         <div class="progress-fill" style="width: ${againstPercent}%; background-color: var(--danger-color)"></div>
                     </div>
                 </div>
 
+                <div class="result-row">
+                    <div class="result-meta">
+                        <span>棄権</span>
+                        <span>${votesAbstain} (${abstainPercent}%)</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${abstainPercent}%; background-color: #888"></div>
+                    </div>
+                </div>
+
                 <!-- Actions -->
                 ${!hasVoted ? `
                     <div class="vote-options">
-                        <button class="vote-btn" onclick="vote('${p.id}', 'for')">Vote For</button>
-                        <button class="vote-btn" onclick="vote('${p.id}', 'against')">Vote Against</button>
+                        <button class="vote-btn" onclick="vote('${p.id}', 'for')">賛成</button>
+                        <button class="vote-btn" onclick="vote('${p.id}', 'against')">反対</button>
+                        <button class="vote-btn" onclick="vote('${p.id}', 'abstain')" style="border-color: #888; color: #ccc;">棄権</button>
                     </div>
                 ` : `
                     <div style="margin-top:15px; font-size:14px; color:var(--text-secondary); text-align:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:4px;">
-                        You have voted.
+                        投票済み
                     </div>
                 `}
             </div>
