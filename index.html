@@ -65,6 +65,32 @@
             </div>
         </div>
 
+        <!-- Firebase SDK -->
+        <script type="module">
+            import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+            import { getDatabase, ref, set, push, onValue, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+            const firebaseConfig = {
+                apiKey: "AIzaSyApIM3BiyhfvKq-3FBQ-BriQKjvAKOLTLM",
+                authDomain: "riudao-vote.firebaseapp.com",
+                databaseURL: "https://riudao-vote-default-rtdb.asia-southeast1.firebasedatabase.app",
+                projectId: "riudao-vote",
+                storageBucket: "riudao-vote.firebasestorage.app",
+                messagingSenderId: "898511253134",
+                appId: "1:898511253134:web:cc02f464974e0b2c8763df"
+            };
+
+            const app = initializeApp(firebaseConfig);
+            const database = getDatabase(app);
+
+            // Expose to global scope for script.js
+            window.firebaseDB = database;
+            window.firebaseRef = ref;
+            window.firebaseSet = set;
+            window.firebasePush = push;
+            window.firebaseOnValue = onValue;
+            window.firebaseUpdate = update;
+        </script>
         <script src="script.js"></script>
 </body>
 

@@ -14,27 +14,41 @@ let provider = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    loadProposals();
-    renderProposals();
+    // Wait for Firebase to be ready
+    const checkFirebase = setInterval(() => {
+        if (window.firebaseDB) {
+            clearInterval(checkFirebase);
+            loadProposals();
 
-    // Check if wallet was previously connected
-    if (localStorage.getItem('walletConnected') === 'true') {
-        connectWallet();
-    }
+            // Check if wallet was previously connected
+            if (localStorage.getItem('walletConnected') === 'true') {
+                connectWallet();
+            }
+        }
+    }, 100);
 });
 
-// Data Management
+// Data Management - Firebase
 function loadProposals() {
-    const saved = localStorage.getItem('vote_proposals');
-    if (saved) {
-        proposals = JSON.parse(saved);
-    } else {
-        proposals = []; // Start EMPTY as requested
-    }
+    const proposalsRef = window.firebaseRef(window.firebaseDB, 'proposals');
+
+    window.firebaseOnValue(proposalsRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            // Convert Firebase object to array and sort by creation time
+            proposals = Object.keys(data).map(key => ({
+                ...data[key],
+                id: key
+            })).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        } else {
+            proposals = [];
+        }
+        renderProposals();
+    });
 }
 
 function saveProposals() {
-    localStorage.setItem('vote_proposals', JSON.stringify(proposals));
+    // No longer needed - Firebase auto-syncs
     renderProposals();
 }
 
@@ -42,19 +56,20 @@ function createProposal(title, description) {
     const deadlineDate = new Date();
     deadlineDate.setHours(deadlineDate.getHours() + 120); // Exactly 120 hours from now
 
-
     const newProposal = {
-        id: Date.now().toString(),
         title,
         description,
         creator: userAddress,
         createdAt: new Date().toISOString(),
         deadline: deadlineDate.toISOString(),
         votes: { for: 0, against: 0, abstain: 0 },
-        votedUsers: [] // Track who voted to prevent double voting locally
+        votedUsers: []
     };
-    proposals.unshift(newProposal); // Add to top
-    saveProposals();
+
+    // Push to Firebase
+    const proposalsRef = window.firebaseRef(window.firebaseDB, 'proposals');
+    window.firebasePush(proposalsRef, newProposal);
+
     closeModal();
 }
 
@@ -141,14 +156,19 @@ function vote(id, option) {
     // Initialize abstain if not present (migration for old data)
     if (!proposal.votes.abstain) proposal.votes.abstain = 0;
 
-    // Update vote
+    // Update vote count
     proposal.votes[option]++;
 
     // Track user
     if (!proposal.votedUsers) proposal.votedUsers = [];
     proposal.votedUsers.push(userAddress);
 
-    saveProposals();
+    // Update Firebase
+    const proposalRef = window.firebaseRef(window.firebaseDB, `proposals/${id}`);
+    window.firebaseUpdate(proposalRef, {
+        votes: proposal.votes,
+        votedUsers: proposal.votedUsers
+    });
 }
 
 // UI Rendering
