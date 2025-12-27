@@ -40,7 +40,8 @@ function saveProposals() {
 
 function createProposal(title, description) {
     const deadlineDate = new Date();
-    deadlineDate.setDate(deadlineDate.getDate() + 3); // Default 3 days deadline
+    deadlineDate.setHours(deadlineDate.getHours() + 120); // Exactly 120 hours from now
+
 
     const newProposal = {
         id: Date.now().toString(),
