@@ -106,7 +106,7 @@ function updateWalletUI() {
     // Shorten address
     const shortAddr = userAddress.substring(0, 6) + "..." + userAddress.substring(userAddress.length - 4);
     addr.innerText = shortAddr;
-    bal.innerText = `${userBalance} Tokens`;
+    bal.innerText = `${userBalance} RDGT`;
 
     // Enable create button if connected
     if (createBtn) createBtn.disabled = false;
@@ -210,6 +210,14 @@ function openModal() {
         alert("Please connect wallet first.");
         return;
     }
+
+    // Check balance
+    const currentBalance = parseFloat(userBalance);
+    if (isNaN(currentBalance) || currentBalance < 2500) {
+        alert("You need at least 2500 RDGT to create a proposal.");
+        return;
+    }
+
     document.getElementById('create-modal').style.display = 'flex';
 }
 
