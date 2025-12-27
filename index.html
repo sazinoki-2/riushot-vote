@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Vote</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.5/ethers.umd.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="branding">
+                <h1>Community Governance</h1>
+            </div>
+
+            <div class="wallet-container">
+                <div id="wallet-stats" class="wallet-stats">
+                    <span id="wallet-address" class="wallet-address"></span>
+                    <span id="wallet-balance" class="wallet-balance"></span>
+                </div>
+                <button id="connect-btn" class="btn btn-primary" onclick="connectWallet()">Connect Wallet</button>
+            </div>
+        </header>
+
+        <!-- Controls -->
+        <div class="controls-bar">
+            <h2 style="font-size:18px; font-weight:500">Active Proposals</h2>
+            <button id="create-btn" class="btn" onclick="openModal()" disabled>+ Create Proposal</button>
+        </div>
+
+        <!-- Proposals List -->
+        <div id="proposals-container">
+            <!-- Injected by JS -->
+        </div>
+
+    </div>
+
+    <!-- Create Modal -->
+    <div id="create-modal" class="modal-overlay">
+        <div class="modal">
+            <h3 class="modal-title">Create New Proposal</h3>
+
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" id="p-title" class="form-input" placeholder="e.g. Increase Staking Rewards">
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="p-desc" class="form-textarea" placeholder="Describe your proposal..."></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="handleSubmitProposal()">Publish</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
