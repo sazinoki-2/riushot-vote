@@ -3,9 +3,9 @@
     --card-bg: #ffffff;
     --text-primary: #24292f;
     --text-secondary: #57606a;
-    --accent-color: #1f883d;
-    /* GitHub-like Green */
-    --accent-hover: #1a7f37;
+    --accent-color: #5E68A6;
+    /* R94 G104 B166 */
+    --accent-hover: #4b5385;
     --border-color: #d0d7de;
     --danger-color: #cf222e;
 
@@ -275,20 +275,21 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 40px;
-    padding-bottom: 20px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
     border-bottom: 1px solid var(--border-color);
 }
 
 .branding {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 8px;
+    /* Tighter gap */
 }
 
 .site-logo {
-    width: 160px;
-    height: 160px;
+    width: 40px;
+    height: 40px;
     object-fit: contain;
     border-radius: 50%;
     /* Optional: circular if it is a token icon */
