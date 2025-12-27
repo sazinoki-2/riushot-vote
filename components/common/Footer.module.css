@@ -1,0 +1,16 @@
+.footer {
+    padding: 2rem 1rem;
+    margin-top: auto;
+    color: var(--muted);
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.disclaimer {
+    margin-bottom: 0.5rem;
+}

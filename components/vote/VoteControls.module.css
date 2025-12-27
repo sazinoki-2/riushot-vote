@@ -1,0 +1,107 @@
+.container {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+}
+
+.heading {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.results {
+    margin-bottom: 2rem;
+}
+
+.resultRow {
+    margin-bottom: 1rem;
+}
+
+.resultHeader {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.barBg {
+    height: 8px;
+    background: var(--background);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.barFill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+/* Voting Area */
+.votingArea {
+    border-top: 1px solid var(--border);
+    padding-top: 1.5rem;
+}
+
+.options {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.optionBtn {
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    font-weight: 500;
+    color: var(--foreground);
+    transition: all 0.2s;
+}
+
+.optionBtn:hover {
+    background: var(--background);
+}
+
+.selectedFor {
+    border-color: var(--success);
+    background: rgba(27, 144, 77, 0.05);
+    color: var(--success);
+}
+
+.selectedAgainst {
+    border-color: var(--danger);
+    background: rgba(207, 38, 47, 0.05);
+    color: var(--danger);
+}
+
+.selectedAbstain {
+    border-color: var(--muted);
+    background: rgba(140, 144, 150, 0.1);
+}
+
+.voteBtn {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--primary);
+    color: var(--primary-fg);
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.voteBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.votedMessage {
+    padding: 1rem;
+    background: var(--background);
+    border-radius: 8px;
+    text-align: center;
+    margin-top: 1rem;
+}
