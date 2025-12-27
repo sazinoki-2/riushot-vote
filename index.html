@@ -12,57 +12,59 @@
 <body>
 
     <div class="container">
-        <!-- Header -->
-        <div class="branding">
-            <img src="adwdawdawdawdaw.png" alt="Logo" class="site-logo">
-            <h1>RIUDAO GOVERNANCE</h1>
-        </div>
+        <div class="container">
+            <!-- Header -->
+            <header>
+                <div class="branding">
+                    <img src="adwdawdawdawdaw.png" alt="Logo" class="site-logo">
+                    <h1>RIUDAO GOVERNANCE</h1>
+                </div>
 
-        <div class="wallet-container">
-            <div id="wallet-stats" class="wallet-stats">
-                <span id="wallet-address" class="wallet-address"></span>
-                <span id="wallet-balance" class="wallet-balance"></span>
-            </div>
-            <button id="connect-btn" class="btn btn-primary" onclick="connectWallet()">Connect Wallet</button>
-        </div>
-        </header>
+                <div class="wallet-container">
+                    <div id="wallet-stats" class="wallet-stats">
+                        <span id="wallet-address" class="wallet-address"></span>
+                        <span id="wallet-balance" class="wallet-balance"></span>
+                    </div>
+                    <button id="connect-btn" class="btn btn-primary" onclick="connectWallet()">Connect Wallet</button>
+                </div>
+            </header>
 
-        <!-- Controls -->
-        <div class="controls-bar">
-            <h2 style="font-size:18px; font-weight:500">投票一覧</h2>
-            <button id="create-btn" class="btn btn-primary" onclick="openModal()" disabled>+ 提案を作成</button>
-        </div>
-
-        <!-- Proposals List -->
-        <div id="proposals-container">
-            <!-- Injected by JS -->
-        </div>
-
-    </div>
-
-    <!-- Create Modal -->
-    <div id="create-modal" class="modal-overlay">
-        <div class="modal">
-            <h3 class="modal-title">提案を作成</h3>
-
-            <div class="form-group">
-                <label>タイトル</label>
-                <input type="text" id="p-title" class="form-input" placeholder="例：報酬プールの増額案について">
+            <!-- Controls -->
+            <div class="controls-bar">
+                <h2 style="font-size:18px; font-weight:500">投票一覧</h2>
+                <button id="create-btn" class="btn btn-primary" onclick="openModal()" disabled>+ 提案を作成</button>
             </div>
 
-            <div class="form-group">
-                <label>提案内容</label>
-                <textarea id="p-desc" class="form-textarea" placeholder="提案の理由や詳細をここに書いてください。"></textarea>
+            <!-- Proposals List -->
+            <div id="proposals-container">
+                <!-- Injected by JS -->
             </div>
 
-            <div class="modal-actions">
-                <button class="btn" onclick="closeModal()">キャンセル</button>
-                <button class="btn btn-primary" onclick="handleSubmitProposal()">公開</button>
+        </div>
+
+        <!-- Create Modal -->
+        <div id="create-modal" class="modal-overlay">
+            <div class="modal">
+                <h3 class="modal-title">提案を作成</h3>
+
+                <div class="form-group">
+                    <label>タイトル</label>
+                    <input type="text" id="p-title" class="form-input" placeholder="例：報酬プールの増額案について">
+                </div>
+
+                <div class="form-group">
+                    <label>提案内容</label>
+                    <textarea id="p-desc" class="form-textarea" placeholder="提案の理由や詳細をここに書いてください。"></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn" onclick="closeModal()">キャンセル</button>
+                    <button class="btn btn-primary" onclick="handleSubmitProposal()">公開</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <script src="script.js"></script>
+        <script src="script.js"></script>
 </body>
 
 </html>
