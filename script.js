@@ -303,20 +303,68 @@ function openModal() {
     }
 
     document.getElementById('create-modal').style.display = 'flex';
+
+    // Setup character counters
+    const titleInput = document.getElementById('p-title');
+    const descInput = document.getElementById('p-desc');
+    const titleCounter = document.getElementById('title-counter');
+    const descCounter = document.getElementById('desc-counter');
+    const submitBtn = document.getElementById('submit-proposal-btn');
+
+    function updateCounters() {
+        const titleLen = titleInput.value.length;
+        const descLen = descInput.value.length;
+
+        titleCounter.textContent = `(${titleLen}/30)`;
+        descCounter.textContent = `(${descLen}/140)`;
+
+        // Change color if approaching limit
+        titleCounter.style.color = titleLen > 25 ? '#cf222e' : 'var(--text-secondary)';
+        descCounter.style.color = descLen > 130 ? '#cf222e' : 'var(--text-secondary)';
+
+        // Disable submit if over limit (shouldn't happen with maxlength, but just in case)
+        if (titleLen > 30 || descLen > 140) {
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.5';
+        } else {
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '1';
+        }
+    }
+
+    titleInput.addEventListener('input', updateCounters);
+    descInput.addEventListener('input', updateCounters);
+    updateCounters();
 }
 
 function closeModal() {
     document.getElementById('create-modal').style.display = 'none';
     document.getElementById('p-title').value = '';
     document.getElementById('p-desc').value = '';
+
+    // Reset counters
+    document.getElementById('title-counter').textContent = '(0/30)';
+    document.getElementById('desc-counter').textContent = '(0/140)';
+    document.getElementById('title-counter').style.color = 'var(--text-secondary)';
+    document.getElementById('desc-counter').style.color = 'var(--text-secondary)';
 }
 
 function handleSubmitProposal() {
-    const title = document.getElementById('p-title').value;
-    const desc = document.getElementById('p-desc').value;
+    const title = document.getElementById('p-title').value.trim();
+    const desc = document.getElementById('p-desc').value.trim();
 
     if (!title || !desc) {
-        alert("Please fill in all fields");
+        alert("タイトルと提案内容を入力してください。");
+        return;
+    }
+
+    if (title.length > 30) {
+        alert("タイトルは30文字以内で入力してください。");
+        return;
+    }
+
+    if (desc.length > 140) {
+        alert("提案内容は140文字以内で入力してください。");
         return;
     }
 
