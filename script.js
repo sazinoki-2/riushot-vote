@@ -75,15 +75,37 @@ function createProposal(title, description) {
 
 // Wallet Logic
 async function connectWallet() {
-    if (typeof window.ethereum === 'undefined') {
-        alert("MetaMaskがインストールされていません。この機能を使用するにはインストールしてください。");
-        return;
-    }
+    const btn = document.getElementById('connect-btn');
+    btn.innerText = "Connecting...";
 
     try {
-        const btn = document.getElementById('connect-btn');
-        btn.innerText = "Connecting...";
+        // Check if mobile device
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
+        if (isMobile) {
+            // Mobile: Use MetaMask deeplink
+            if (typeof window.ethereum === 'undefined') {
+                // MetaMask app not detected, open deeplink
+                const currentUrl = window.location.href;
+                const metamaskDeeplink = `https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`;
+
+                // Redirect to MetaMask app
+                window.location.href = metamaskDeeplink;
+
+                // Show message
+                alert("MetaMaskアプリを開いています...");
+                return;
+            }
+        } else {
+            // Desktop: Check for MetaMask extension
+            if (typeof window.ethereum === 'undefined') {
+                alert("MetaMaskがインストールされていません。この機能を使用するにはインストールしてください。");
+                btn.innerText = "Connect Wallet";
+                return;
+            }
+        }
+
+        // Connect via MetaMask (works on both mobile app and desktop extension)
         provider = new ethers.BrowserProvider(window.ethereum);
         const accounts = await provider.send("eth_requestAccounts", []);
         userAddress = accounts[0];
@@ -101,7 +123,7 @@ async function connectWallet() {
         } else {
             alert("接続に失敗しました: " + (error.message || "不明なエラー"));
         }
-        document.getElementById('connect-btn').innerText = "Connect Wallet";
+        btn.innerText = "Connect Wallet";
     }
 }
 
