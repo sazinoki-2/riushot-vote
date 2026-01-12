@@ -146,7 +146,8 @@ h1 {
     border: 1px solid rgba(35, 134, 54, 0.4);
 }
 
-.proposal-status.closed {
+.proposal-status.closed,
+.proposal-status.invalid {
     background: rgba(128, 128, 128, 0.2);
     color: #888;
     border: 1px solid rgba(128, 128, 128, 0.4);

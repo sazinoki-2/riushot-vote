@@ -240,21 +240,73 @@ function renderProposals() {
         const isExpired = deadlineDate && now > deadlineDate;
 
         const total = votesFor + votesAgainst + votesAbstain;
+        const uniqueVoters = p.votedUsers ? p.votedUsers.length : 0;
+
+        // Quorum Check: 50,000 votes AND 5 unique wallets
+        const isQuorumMet = total >= 50000 && uniqueVoters >= 5;
+
         const forPercent = total === 0 ? 0 : Math.round((votesFor / total) * 100);
         const againstPercent = total === 0 ? 0 : Math.round((votesAgainst / total) * 100);
         const abstainPercent = total === 0 ? 0 : Math.round((votesAbstain / total) * 100);
 
         const hasVoted = p.votedUsers && userAddress && p.votedUsers.includes(userAddress);
 
+        // Determine Status Badge
+        let statusBadge = '';
+        if (isExpired) {
+            if (isQuorumMet) {
+                statusBadge = '<span class="proposal-status closed">終了</span>';
+            } else {
+                statusBadge = '<span class="proposal-status invalid">無効</span>';
+            }
+        } else {
+            statusBadge = '<span class="proposal-status active">Active</span>';
+        }
+
+        // Determine Action Area
+        let actionArea = '';
+        if (isExpired) {
+            if (isQuorumMet) {
+                actionArea = `
+                    <div style="margin-top:15px; font-size:14px; color:var(--text-secondary); text-align:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:4px;">
+                        投票期間が終了しました
+                    </div>
+                `;
+            } else {
+                actionArea = `
+                    <div style="margin-top:15px; font-size:14px; color:#cf222e; text-align:center; background:rgba(207, 34, 46, 0.1); padding:10px; border-radius:4px; border: 1px solid rgba(207, 34, 46, 0.3);">
+                        Quorum Not Met (ウォレット接続数/投票数が要件未達)
+                    </div>
+                `;
+            }
+        } else {
+            if (!hasVoted) {
+                actionArea = `
+                    <div class="vote-options">
+                        <button class="vote-btn" onclick="vote('${p.id}', 'for')">賛成</button>
+                        <button class="vote-btn" onclick="vote('${p.id}', 'against')">反対</button>
+                        <button class="vote-btn" onclick="vote('${p.id}', 'abstain')" style="border-color: #888; color: #ccc;">棄権</button>
+                    </div>
+                `;
+            } else {
+                actionArea = `
+                    <div style="margin-top:15px; font-size:14px; color:var(--text-secondary); text-align:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:4px;">
+                        投票済み
+                    </div>
+                `;
+            }
+        }
+
         return `
             <div class="proposal-card">
                 <div class="proposal-header">
-                    <span class="proposal-status ${isExpired ? 'closed' : 'active'}">${isExpired ? '終了' : 'Active'}</span>
+                    ${statusBadge}
                     <span style="color:var(--text-secondary); font-size:12px">投票期限 ${deadlineText}</span>
                 </div>
                 <h3 class="proposal-title">${p.title}</h3>
                 <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">
                     提案者: ${creator}
+                    <span style="margin-left: 10px; opacity: 0.8;">(現在の参加: ${uniqueVoters}名 / Total: ${total.toLocaleString()} RDGT)</span>
                 </div>
                 <p class="proposal-desc">${p.description}</p>
                 
@@ -290,21 +342,7 @@ function renderProposals() {
                 </div>
 
                 <!-- Actions -->
-                ${isExpired ? `
-                    <div style="margin-top:15px; font-size:14px; color:var(--text-secondary); text-align:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:4px;">
-                        投票期間が終了しました
-                    </div>
-                ` : (!hasVoted ? `
-                    <div class="vote-options">
-                        <button class="vote-btn" onclick="vote('${p.id}', 'for')">賛成</button>
-                        <button class="vote-btn" onclick="vote('${p.id}', 'against')">反対</button>
-                        <button class="vote-btn" onclick="vote('${p.id}', 'abstain')" style="border-color: #888; color: #ccc;">棄権</button>
-                    </div>
-                ` : `
-                    <div style="margin-top:15px; font-size:14px; color:var(--text-secondary); text-align:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:4px;">
-                        投票済み
-                    </div>
-                `)}
+                ${actionArea}
             </div>
         `;
     }).join('');
