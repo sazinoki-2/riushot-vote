@@ -32,7 +32,18 @@
 
             <!-- Controls -->
             <div class="controls-bar">
-                <h2 style="font-size:18px; font-weight:500">投票一覧</h2>
+                <div>
+                    <h2 style="font-size:18px; font-weight:500; display:flex; align-items:center; gap:10px;">
+                        投票一覧
+                        <span
+                            style="font-size:11px; color:var(--text-secondary); font-weight:normal; border:1px solid var(--border-color); padding:4px 8px; border-radius:4px; display:inline-flex; align-items:center; gap:5px; background:var(--card-bg);">
+                            <span title="成立条件">⚖️ 成立条件:</span>
+                            <span>🗳️ 50,000 RDGT以上</span>
+                            <span style="color:var(--border-color)">|</span>
+                            <span>👤 5ウォレット以上</span>
+                        </span>
+                    </h2>
+                </div>
                 <button id="create-btn" class="btn btn-primary" onclick="openModal()" disabled>+ Create
                     Proposal</button>
             </div>
