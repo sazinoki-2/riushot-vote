@@ -274,7 +274,7 @@ function renderProposals() {
                 `;
             } else {
                 actionArea = `
-                    <div style="margin-top:15px; font-size:14px; color:#cf222e; text-align:center; background:rgba(207, 34, 46, 0.1); padding:10px; border-radius:4px; border: 1px solid rgba(207, 34, 46, 0.3);">
+                    <div style="margin-top:15px; font-size:14px; color:var(--text-secondary); text-align:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:4px;">
                         Quorum Not Met (ウォレット接続数/投票数が要件未達)
                     </div>
                 `;
