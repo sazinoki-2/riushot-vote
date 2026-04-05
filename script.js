@@ -382,33 +382,31 @@ function openModal() {
         titleCounter.style.color = titleLen > 25 ? '#cf222e' : 'var(--text-secondary)';
         descCounter.style.color = descLen > 130 ? '#cf222e' : 'var(--text-secondary)';
 
-        // Disable submit if over limit (shouldn't happen with maxlength, but just in case)
-        if (titleLen > 30 || descLen > 140) {
-            submitBtn.disabled = true;
-            submitBtn.style.opacity = '0.5';
-        } else {
-            submitBtn.disabled = false;
-            submitBtn.style.opacity = '1';
-        }
+        // ボタン制御はupdateSubmitBtnに委譲
+        updateSubmitBtn();
     }
 
     titleInput.addEventListener('input', updateCounters);
     descInput.addEventListener('input', updateCounters);
-    updateCounters();
 
-    // 初期状態：チェックなし → 公開ボタン無効
+    // 初期状態：チェックリセット → 公開ボタン無効
     const checkbox = document.getElementById('terms-checkbox');
     checkbox.checked = false;
-    submitBtn.disabled = true;
-    submitBtn.style.opacity = '0.5';
+    updateCounters();
 }
 
 function updateSubmitBtn() {
-    const checkbox = document.getElementById('terms-checkbox');
+    const titleVal = document.getElementById('p-title').value.trim();
+    const descVal = document.getElementById('p-desc').value.trim();
+    const titleLen = document.getElementById('p-title').value.length;
+    const descLen = document.getElementById('p-desc').value.length;
+    const isChecked = document.getElementById('terms-checkbox').checked;
     const submitBtn = document.getElementById('submit-proposal-btn');
-    const isChecked = checkbox.checked;
-    submitBtn.disabled = !isChecked;
-    submitBtn.style.opacity = isChecked ? '1' : '0.5';
+
+    // 3条件すべて満たす場合のみ有効
+    const isValid = titleVal.length > 0 && descVal.length > 0 && isChecked && titleLen <= 30 && descLen <= 140;
+    submitBtn.disabled = !isValid;
+    submitBtn.style.opacity = isValid ? '1' : '0.5';
 }
 
 function closeModal() {
