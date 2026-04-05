@@ -395,12 +395,27 @@ function openModal() {
     titleInput.addEventListener('input', updateCounters);
     descInput.addEventListener('input', updateCounters);
     updateCounters();
+
+    // 初期状態：チェックなし → 公開ボタン無効
+    const checkbox = document.getElementById('terms-checkbox');
+    checkbox.checked = false;
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = '0.5';
+}
+
+function updateSubmitBtn() {
+    const checkbox = document.getElementById('terms-checkbox');
+    const submitBtn = document.getElementById('submit-proposal-btn');
+    const isChecked = checkbox.checked;
+    submitBtn.disabled = !isChecked;
+    submitBtn.style.opacity = isChecked ? '1' : '0.5';
 }
 
 function closeModal() {
     document.getElementById('create-modal').style.display = 'none';
     document.getElementById('p-title').value = '';
     document.getElementById('p-desc').value = '';
+    document.getElementById('terms-checkbox').checked = false;
 
     // Reset counters
     document.getElementById('title-counter').textContent = '(0/30)';
@@ -437,3 +452,4 @@ window.vote = vote;
 window.openModal = openModal;
 window.closeModal = closeModal;
 window.handleSubmitProposal = handleSubmitProposal;
+window.updateSubmitBtn = updateSubmitBtn;
