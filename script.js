@@ -144,18 +144,24 @@ async function connectWallet() {
 
 async function checkAndDelegate() {
     if (!userAddress || !provider) return;
+    console.log("[delegate] checkAndDelegate 開始, userAddress:", userAddress);
     try {
         const signer = await provider.getSigner();
         const contract = new ethers.Contract(TOKEN_ADDRESS, ERC20_ABI, signer);
         const currentDelegate = await contract.delegates(userAddress);
+        console.log("[delegate] 現在のdelegate先:", currentDelegate);
         // 自分自身へのデリゲートが未完了の場合のみTXを送信
         if (currentDelegate.toLowerCase() !== userAddress.toLowerCase()) {
+            console.log("[delegate] 未デリゲート → TX送信へ");
             alert("投票権を有効にするため、一度だけMetaMaskで署名が必要です（デリゲート）。\nガス代は数円程度です。");
             const tx = await contract.delegate(userAddress);
             await tx.wait();
             alert("デリゲート完了！これ以降は追加の署名は不要です。");
+        } else {
+            console.log("[delegate] 既にself-delegate済み → スキップ");
         }
     } catch (e) {
+        console.warn("[delegate] エラー:", e.code, e.message);
         // ユーザーがキャンセルした場合は無視
         if (e.code !== 4001 && e.code !== 'ACTION_REJECTED') {
             console.warn("delegate check error:", e);
