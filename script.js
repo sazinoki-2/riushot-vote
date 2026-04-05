@@ -3,7 +3,10 @@ const TOKEN_ADDRESS = '0x4989e24fEC5E3bb2De5d67C078e5a28c37681cB9';
 const ERC20_ABI = [
     "function balanceOf(address owner) view returns (uint256)",
     "function decimals() view returns (uint8)",
-    "function symbol() view returns (string)"
+    "function symbol() view returns (string)",
+    "function getPastVotes(address account, uint256 blockNumber) view returns (uint256)",
+    "function delegates(address account) view returns (address)",
+    "function delegate(address delegatee)"
 ];
 
 // State
@@ -52,9 +55,17 @@ function saveProposals() {
     renderProposals();
 }
 
-function createProposal(title, description) {
+async function createProposal(title, description) {
     const deadlineDate = new Date();
     deadlineDate.setHours(deadlineDate.getHours() + 120); // Exactly 120 hours from now
+
+    // スナップショットブロック（提案作成時点）を記録
+    let snapshotBlock = null;
+    try {
+        snapshotBlock = await provider.getBlockNumber();
+    } catch (e) {
+        console.warn("snapshotBlock取得失敗:", e);
+    }
 
     const newProposal = {
         title,
@@ -62,6 +73,7 @@ function createProposal(title, description) {
         creator: userAddress,
         createdAt: new Date().toISOString(),
         deadline: deadlineDate.toISOString(),
+        snapshotBlock: snapshotBlock,
         votes: { for: 0, against: 0, abstain: 0 },
         votedUsers: []
     };
@@ -115,6 +127,9 @@ async function connectWallet() {
         await updateBalance();
         updateWalletUI();
 
+        // 初回デリゲートチェック（未デリゲートなら自動TX）
+        await checkAndDelegate();
+
     } catch (error) {
         console.error(error);
         // data checks for common user rejection codes (4001 is standard EIP-1193 user rejected request)
@@ -124,6 +139,27 @@ async function connectWallet() {
             alert("接続に失敗しました: " + (error.message || "不明なエラー"));
         }
         btn.innerText = "Connect Wallet";
+    }
+}
+
+async function checkAndDelegate() {
+    if (!userAddress || !provider) return;
+    try {
+        const signer = await provider.getSigner();
+        const contract = new ethers.Contract(TOKEN_ADDRESS, ERC20_ABI, signer);
+        const currentDelegate = await contract.delegates(userAddress);
+        // 自分自身へのデリゲートが未完了の場合のみTXを送信
+        if (currentDelegate.toLowerCase() !== userAddress.toLowerCase()) {
+            alert("投票権を有効にするため、一度だけMetaMaskで署名が必要です（デリゲート）。\nガス代は数円程度です。");
+            const tx = await contract.delegate(userAddress);
+            await tx.wait();
+            alert("デリゲート完了！これ以降は追加の署名は不要です。");
+        }
+    } catch (e) {
+        // ユーザーがキャンセルした場合は無視
+        if (e.code !== 4001 && e.code !== 'ACTION_REJECTED') {
+            console.warn("delegate check error:", e);
+        }
     }
 }
 
@@ -161,7 +197,7 @@ function updateWalletUI() {
 }
 
 // Voting Logic
-function vote(id, option) {
+async function vote(id, option) {
     if (!userAddress) {
         alert("投票するにはウォレットを接続してください。");
         return;
@@ -178,11 +214,31 @@ function vote(id, option) {
     // Initialize abstain if not present (migration for old data)
     if (!proposal.votes.abstain) proposal.votes.abstain = 0;
 
-    // Get user's token balance for weighted voting
-    const voteWeight = parseFloat(userBalance) || 0;
+    // 投票ウェイト取得
+    // snapshotBlock があればgetPastVotes（スナップショット方式）、なければbalanceOf（旧提案フォールバック）
+    let voteWeight = 0;
+    try {
+        const contract = new ethers.Contract(TOKEN_ADDRESS, ERC20_ABI, provider);
+        const decimals = await contract.decimals().catch(() => 18);
+        if (proposal.snapshotBlock) {
+            const rawVotes = await contract.getPastVotes(userAddress, proposal.snapshotBlock);
+            voteWeight = parseFloat(ethers.formatUnits(rawVotes, decimals));
+        } else {
+            // 旧提案：リアルタイム残高で代替
+            const rawBalance = await contract.balanceOf(userAddress);
+            voteWeight = parseFloat(ethers.formatUnits(rawBalance, decimals));
+        }
+    } catch (e) {
+        console.error("投票ウェイト取得エラー:", e);
+        voteWeight = 0;
+    }
 
     if (voteWeight <= 0) {
-        alert("投票するにはRDGTトークンが必要です。");
+        if (proposal.snapshotBlock) {
+            alert("この提案の作成時点（スナップショット）でRDGTを保有していないか、デリゲートが完了していません。");
+        } else {
+            alert("投票するにはRDGTトークンが必要です。");
+        }
         return;
     }
 
