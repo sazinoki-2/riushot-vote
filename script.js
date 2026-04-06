@@ -1,3 +1,20 @@
+// Firebase imports (module-scoped, not exposed to window)
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getDatabase, ref, push, onValue, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+const firebaseConfig = {
+    apiKey: "AIzaSyApIM3BiyhfvKq-3FBQ-BriQKjvAKOLTLM",
+    authDomain: "riudao-vote.firebaseapp.com",
+    databaseURL: "https://riudao-vote-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "riudao-vote",
+    storageBucket: "riudao-vote.firebasestorage.app",
+    messagingSenderId: "898511253134",
+    appId: "1:898511253134:web:cc02f464974e0b2c8763df"
+};
+
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+
 // Config
 const TOKEN_ADDRESS = '0x4989e24fEC5E3bb2De5d67C078e5a28c37681cB9';
 const ERC20_ABI = [
@@ -15,27 +32,19 @@ let userAddress = null;
 let userBalance = 0;
 let provider = null;
 
-// Initialize
+// Initialize (modules are deferred, DOM is ready when this runs)
 document.addEventListener('DOMContentLoaded', () => {
-    // Wait for Firebase to be ready
-    const checkFirebase = setInterval(() => {
-        if (window.firebaseDB) {
-            clearInterval(checkFirebase);
-            loadProposals();
-
-            // Check if wallet was previously connected
-            if (localStorage.getItem('walletConnected') === 'true') {
-                connectWallet();
-            }
-        }
-    }, 100);
+    loadProposals();
+    if (localStorage.getItem('walletConnected') === 'true') {
+        connectWallet();
+    }
 });
 
 // Data Management - Firebase
 function loadProposals() {
-    const proposalsRef = window.firebaseRef(window.firebaseDB, 'proposals');
+    const proposalsRef = ref(database, 'proposals');
 
-    window.firebaseOnValue(proposalsRef, (snapshot) => {
+    onValue(proposalsRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
             // Convert Firebase object to array and sort by creation time
@@ -79,8 +88,8 @@ async function createProposal(title, description) {
     };
 
     // Push to Firebase
-    const proposalsRef = window.firebaseRef(window.firebaseDB, 'proposals');
-    window.firebasePush(proposalsRef, newProposal);
+    const proposalsRef = ref(database, 'proposals');
+    push(proposalsRef, newProposal);
 
     closeModal();
 }
@@ -256,8 +265,8 @@ async function vote(id, option) {
     proposal.votedUsers.push(userAddress);
 
     // Update Firebase
-    const proposalRef = window.firebaseRef(window.firebaseDB, `proposals/${id}`);
-    window.firebaseUpdate(proposalRef, {
+    const proposalRef = ref(database, `proposals/${id}`);
+    update(proposalRef, {
         votes: proposal.votes,
         votedUsers: proposal.votedUsers
     });
@@ -506,7 +515,7 @@ function handleSubmitProposal() {
     createProposal(title, desc);
 }
 
-// Global expose
+// Global expose (UI onclick handlers only - Firebase functions are NOT exposed)
 window.connectWallet = connectWallet;
 window.vote = vote;
 window.openModal = openModal;

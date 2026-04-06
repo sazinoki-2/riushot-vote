@@ -1,0 +1,24 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "proposals": {
+      ".read": true,
+      "$proposalId": {
+        ".write": true,
+        "votes": {
+          ".validate": "newData.hasChildren(['for', 'against', 'abstain'])",
+          "for": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && (!data.exists() || newData.val() >= data.val())"
+          },
+          "against": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && (!data.exists() || newData.val() >= data.val())"
+          },
+          "abstain": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && (!data.exists() || newData.val() >= data.val())"
+          }
+        }
+      }
+    }
+  }
+}
