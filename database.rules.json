@@ -5,17 +5,21 @@
     "proposals": {
       ".read": true,
       "$proposalId": {
-        ".write": true,
+        ".write": "!data.exists()",
+        "title":       { ".validate": "newData.isString()" },
+        "description": { ".validate": "newData.isString()" },
+        "creator":     { ".validate": "newData.isString()" },
         "votes": {
+          ".write": true,
           ".validate": "newData.hasChildren(['for', 'against', 'abstain'])",
-          "for": {
-            ".validate": "newData.isNumber() && newData.val() >= 0 && (!data.exists() || newData.val() >= data.val())"
-          },
-          "against": {
-            ".validate": "newData.isNumber() && newData.val() >= 0 && (!data.exists() || newData.val() >= data.val())"
-          },
-          "abstain": {
-            ".validate": "newData.isNumber() && newData.val() >= 0 && (!data.exists() || newData.val() >= data.val())"
+          "for":     { ".validate": "newData.isNumber() && newData.val() >= 0 && (!data.exists() || newData.val() >= data.val())" },
+          "against": { ".validate": "newData.isNumber() && newData.val() >= 0 && (!data.exists() || newData.val() >= data.val())" },
+          "abstain": { ".validate": "newData.isNumber() && newData.val() >= 0 && (!data.exists() || newData.val() >= data.val())" }
+        },
+        "votedUsers": {
+          "$address": {
+            ".write": "!data.exists()",
+            ".validate": "newData.val() === true"
           }
         }
       }

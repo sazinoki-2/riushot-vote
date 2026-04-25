@@ -83,8 +83,7 @@ async function createProposal(title, description) {
         createdAt: new Date().toISOString(),
         deadline: deadlineDate.toISOString(),
         snapshotBlock: snapshotBlock,
-        votes: { for: 0, against: 0, abstain: 0 },
-        votedUsers: []
+        votes: { for: 0, against: 0, abstain: 0 }
     };
 
     // Push to Firebase
@@ -221,7 +220,12 @@ async function vote(id, option) {
     const proposal = proposals.find(p => p.id === id);
     if (!proposal) return;
 
-    if (proposal.votedUsers && proposal.votedUsers.includes(userAddress)) {
+    // Check if already voted (supports both old array and new object format)
+    const votedUsers = proposal.votedUsers || {};
+    const alreadyVoted = Array.isArray(votedUsers)
+        ? (votedUsers.includes(userAddress) || votedUsers.includes(userAddress.toLowerCase()))
+        : votedUsers[userAddress.toLowerCase()];
+    if (alreadyVoted) {
         alert("既にこの提案に投票済みです。");
         return;
     }
@@ -260,16 +264,18 @@ async function vote(id, option) {
     // Update vote count with weighted balance
     proposal.votes[option] = (proposal.votes[option] || 0) + voteWeight;
 
-    // Track user
-    if (!proposal.votedUsers) proposal.votedUsers = [];
-    proposal.votedUsers.push(userAddress);
-
-    // Update Firebase
+    // Update Firebase with multi-path update
+    // votedUsers/{address} is protected by Firebase rules: write only if !data.exists()
     const proposalRef = ref(database, `proposals/${id}`);
-    update(proposalRef, {
-        votes: proposal.votes,
-        votedUsers: proposal.votedUsers
-    });
+    const updates = {};
+    updates['votes'] = proposal.votes;
+    updates[`votedUsers/${userAddress.toLowerCase()}`] = true;
+    try {
+        await update(proposalRef, updates);
+    } catch (e) {
+        console.error("投票書き込みエラー:", e);
+        alert("投票に失敗しました。既に投票済みか、通信エラーの可能性があります。");
+    }
 }
 
 // UI Rendering
@@ -311,7 +317,9 @@ function renderProposals() {
         const isExpired = deadlineDate && now > deadlineDate;
 
         const total = votesFor + votesAgainst + votesAbstain;
-        const uniqueVoters = p.votedUsers ? p.votedUsers.length : 0;
+        const uniqueVoters = p.votedUsers
+            ? (Array.isArray(p.votedUsers) ? p.votedUsers.length : Object.keys(p.votedUsers).length)
+            : 0;
 
         // Quorum Check: 50,000 votes AND 5 unique wallets
         const isQuorumMet = total >= 50000 && uniqueVoters >= 5;
@@ -320,7 +328,11 @@ function renderProposals() {
         const againstPercent = total === 0 ? 0 : Math.round((votesAgainst / total) * 100);
         const abstainPercent = total === 0 ? 0 : Math.round((votesAbstain / total) * 100);
 
-        const hasVoted = p.votedUsers && userAddress && p.votedUsers.includes(userAddress);
+        const hasVoted = p.votedUsers && userAddress && (
+            Array.isArray(p.votedUsers)
+                ? (p.votedUsers.includes(userAddress) || p.votedUsers.includes(userAddress.toLowerCase()))
+                : p.votedUsers[userAddress.toLowerCase()]
+        );
 
         // Determine Status Badge
         let statusBadge = '';
